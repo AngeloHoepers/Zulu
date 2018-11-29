@@ -1,0 +1,15 @@
+eclipse.preferences.version=1
+encoding//WebContent/index.html=UTF-8
+encoding//WebContent/paginas/admin=UTF-8
+encoding//WebContent/paginas/admin/adicionarAdm.html=UTF-8
+encoding//WebContent/paginas/admin/main.html=UTF-8
+encoding//WebContent/paginas/admin/perfilDoAdm.html=UTF-8
+encoding//WebContent/paginas/admin/rankingAdm.html=UTF-8
+encoding//WebContent/paginas/admin/visualizarDadosJogadores.html=UTF-8
+encoding//WebContent/paginas/jogador/index.html=UTF-8
+encoding//WebContent/paginas/jogador/main.html=UTF-8
+encoding//WebContent/paginas/jogador/perfil.html=UTF-8
+encoding//WebContent/paginas/jogador/ranking.html=UTF-8
+encoding//WebContent/paginas/visitante/cadastro.html=UTF-8
+encoding//WebContent/paginas/visitante/main.html=UTF-8
+encoding/<project>=UTF-8

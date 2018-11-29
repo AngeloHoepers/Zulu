@@ -1,0 +1,7 @@
+INDEX VERSION 1.3+C:\Users\angelo_hoepers\Downloads\workspaceZulu\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+354231976.index
+3270429822.index
+611070386.index
+4095005209.index
+1307443439.index
+3861030497.index

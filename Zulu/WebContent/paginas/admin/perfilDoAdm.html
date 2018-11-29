@@ -1,0 +1,62 @@
+<div class="divGeralAdm">
+  <img class="logoZuluAdm" src="../../layout/imagens/logoteste.png" alt="Logo Zulu"/>
+  <div class="formulario">
+      <h1 class="tituloPagAdm">Dados Pessoais:</h1>
+    <form name="frmperfil" onsubmit="return validacaoAlterarDados()" method="post">
+      <table class="tableForm" id="perfilAdm">
+        <tr>
+          <td>Nome:</td>
+        </tr>
+        <tr>
+        	<td><span id="nome"></span></td>
+        </tr>
+        <tr>
+          <td>Data de Nascimento:</td>
+        </tr>
+        <tr>
+        	<td><span id="nascimento"></span></td>
+        </tr>
+        <tr>
+          <td>E-mail:</td>
+        </tr>
+        <tr>
+        	<td><span id="email"></span></td>
+        </tr>
+        <tr>
+          <td>Usuário:</td>
+        </tr>
+        <tr>
+        	<td><span id="login"></span></td>
+        </tr>        
+        <tr class="tabela2">
+          <td>Senha Atual:</td>
+        </tr>
+        <tr class="tabela2">
+          <td><input type="password" name="pwdSenhaAtual"></td>
+        </tr>
+        <tr class="tabela2">
+          <td>Nova Senha:</td>
+        </tr>
+        <tr class="tabela2">
+          <td><input type="password" name="pwdNovaSenha"></td>
+        </tr>
+        <tr class="tabela2">
+          <td>Confirmar Senha:</td>
+        </tr>
+        <tr class="tabela2">
+          <td><input type="password" name="pwdConfirmarNovaSenha"></td>
+        </tr>
+        <tr>
+        	<td class="tabela2">
+        	<input type="hidden" name="hdPermissao" value="0">
+          	<button type="button" name="btnVoltar" onclick="voltar()">Voltar</button>
+            <button type="button" name="btnSalvar" onclick="alteraUsuario()">Salvar</button>
+          </td>
+        </tr>
+        <tr>
+          <td><button class="btnAlterar" type="button" name="btnAlterar" onclick="alterar()">Alterar</button></td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>

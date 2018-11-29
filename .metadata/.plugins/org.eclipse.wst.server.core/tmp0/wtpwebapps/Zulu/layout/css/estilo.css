@@ -1,0 +1,413 @@
+/*#geral.html*/
+html{
+    font-family: Arial;
+}
+
+body{
+  margin: 0;
+}
+
+button a{
+  text-decoration: none;
+  color: black;
+}
+
+footer{
+  background-color: white;
+  text-align: center;
+}
+
+.menuPrincipal {
+  display: flex;
+	background: #323639;
+	padding-left: 200px;
+	margin: 0;
+}
+
+.item{
+  display: flex;
+	align-items: center;
+	min-height: 48px;
+	user-select: none;
+}
+
+.item a{
+  text-decoration: none;
+  color: #f1f1f1;
+  padding: 0px 70px 0px 70px;
+}
+
+.item:hover{
+	background-color: #9b9b9b;
+}
+
+
+.menuPrincipalJogador {
+  display: flex;
+	background: #323639;
+	padding-left: 300px;
+	margin: 0;
+}
+
+.itemJogador{
+  display: flex;
+	align-items: center;
+	min-height: 48px;
+	user-select: none;
+}
+
+.itemJogador:hover{
+	background-color: #9b9b9b;
+}
+
+.itemJogador a{
+  text-decoration: none;
+  color: #f1f1f1;
+  padding: 0px 70px 0px 70px;
+}
+
+/*index.html*/
+
+.fundo{
+  background-image: url("../imagens/fundoSapoLogo.png");
+  background-repeat: no-repeat;
+  width: auto;
+  height: 720px;
+}
+
+#sobreIndex{
+  border-top: 2px solid black;
+}
+
+#sobreIndex h1 {
+  text-align: center;
+}
+
+.paragrafos {
+  margin-left: 25px;
+  margin-right: 25px;
+  font-size: 20px;
+  text-align: justify;
+}
+
+#rankingIndex h1{
+  text-align: center;
+}
+
+.rankingsIndex{
+  display: flex;
+  text-align: center;
+  margin-left: 50px;
+}
+
+.rankingsIndex table{
+  width: 550px;
+  border-collapse: collapse;
+}
+
+.rankingsIndex td{
+  border: 1px solid black;
+}
+
+.rankingsIndex tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.ranking1Index{
+  width: 570px;
+  height: 210px;
+  overflow-y: auto;
+  margin-left: 35px;
+}
+
+.ranking2Index{
+  width: 570px;
+  height: 210px;
+  overflow-y: auto;
+  margin-left: 35px;
+}
+
+/*inicioAdm.html*/
+
+.menuPrincipalAdmin {
+  display: flex;
+	background: #323639;
+	padding-left: 30px;
+	padding-right: 30px;
+	margin: 0;
+}
+
+.itemAdm{
+  display: flex;
+	align-items: center;
+	min-height: 48px;
+	margin-left: 2px;
+}
+
+.itemAdm:hover{
+	background-color: #9b9b9b;
+}
+
+.itemAdm a{
+  text-decoration: none;
+  color: #f1f1f1;
+  padding: 15px 60px 15px 60px;
+}
+
+.divGeral{
+  width: auto;
+  margin-left: 150px;
+  margin-right: 150px;
+  margin-bottom: 50px;
+}
+
+.divGeralAdm{
+  background-image: linear-gradient(to bottom, #CFCFCF, #a8a8a8);
+  width: auto;
+  margin-left: 150px;
+  margin-right: 150px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-bottom: 50px;
+}
+
+.divTotCadastro, .divTotOnline{
+  border: 4px solid grey;
+  height: 250px;
+  width: 650px;
+  margin-left: 135px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.divTotCadastro p, .divTotOnline p, .divPorcentIdade p{
+  font-size: 60px;
+  margin: 10px;
+}
+
+.divPorcentIdade{
+  border: 4px solid grey;
+  width: 650px;
+  margin-left: 135px;
+  margin-top: 20px;
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.divDashboard{
+  border: 1px solid black;
+  margin-left: 70px;
+  margin-right: 70px;
+  font-size: 23px;
+  width: auto;
+}
+
+/*adicionarAdm.html*/
+
+.logoZuluAdm, .logoZulu{
+  position: relative;
+  left: 690px;
+  top: 30px;
+  height: 80px;
+  width: 270px;
+}
+
+.formulario{
+  border: 1px solid black;
+  margin-left: 70px;
+  margin-right: 70px;
+  font-size: 23px;
+  margin-top: 0;
+}
+
+ .formulario input{
+   width: 230px;
+ }
+
+.formulario button{
+  margin-right:50px;
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+.tableForm{
+  height: auto;
+  margin-left: 350px;
+  margin-bottom: 10px;
+}
+
+/*visualizarDadosJogadores.html*/
+
+.divTabela{
+  border: 1px solid black;
+  margin-left: 70px;
+  margin-right: 70px;
+  font-size: 23px;
+  width: auto;
+}
+
+.tagTable{
+ width: 800px;
+ height: auto;
+ margin-left: 61px;
+ margin-bottom: 20px;
+ text-align: center;
+ border: 1px solid gray;
+}
+
+.tagTable th{
+  border: 1px solid gray;
+}
+
+.tagTable td{
+  border: 1px solid gray;
+}
+
+.tituloPag{
+   text-align: center;
+   margin-top: 50px;
+}
+
+.tituloPagAdm{
+   text-align: center;
+   margin-top: 50px;
+}
+
+/*rankingAdm.html*/
+
+.tituloTabela{
+   text-align: center;
+   font-weight: bold;
+}
+
+.rankings{
+  border: 1px solid black;
+  margin-left: 70px;
+  margin-right: 70px;
+  font-size: 23px;
+  width: auto;
+  text-align: center;
+}
+
+.tabelasRanking h1{
+  text-align: center;
+}
+
+.rankings table{
+  width: 490px;
+  border-collapse: collapse;
+}
+
+.rankings td{
+  border: 1px solid black;
+}
+
+.rankings tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.ranking1Adm, .ranking2Adm, .ranking1, .ranking2{
+  width: 506px;
+  height: 300px;
+  overflow-y: auto;
+  margin-left: 180px;
+  margin-bottom: 50px;
+}
+
+.jogadoresEspeciais{
+  display: flex;
+}
+
+.jogadorEspecial1{
+  width: 600px;
+  background-color: purple;
+  margin-left: 50px;
+}
+
+.jogadorEspecial2{
+ width: 600px;
+ background-color: purple;
+ margin-left: 70px;
+ }
+
+.rankings button{
+  width: 200px;
+  margin-top: 20px;
+  margin-left: 550px;
+}
+
+.botaoface{
+  background-image: url(../imagens/iconeFace.png);
+  background-repeat: no-repeat;
+  margin-bottom: 20px;
+}
+
+.jogo{
+   border: 1px solid black;
+   width: 908px;
+   height: 445px;
+   margin: 70px;
+}
+
+/* Modal's */
+
+.logoModal{
+  height: 80px;
+  width: 220px;
+}
+
+#modals {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+#dialog1 {
+  margin: 15% auto;
+  background-color: #fefefe;
+  box-shadow: 0 4px 8px 0 black,0 6px 20px 0 black;
+  width:500px;
+  height:250px;
+}
+
+#dialog1 .d-header {
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+#dialog1 .d-body {
+  margin-left: 110px;
+  font-size: 25px;
+}
+
+#dialog2 {
+  margin: 15% auto;
+  background-color: #fefefe;
+  box-shadow: 0 4px 8px 0 black,0 6px 20px 0 black;
+  width:500px;
+  height:250px;
+}
+
+#dialog2 .d2-header {
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+#dialog2 .d2-body {
+  margin-left: 110px;
+  font-size: 25px;
+}
+
+#modal-esqueciSenha{
+  cursor: pointer;
+  font-size: 25px;
+  font-style: italic;
+}

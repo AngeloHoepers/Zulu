@@ -1,0 +1,1475 @@
+var timer;
+var total = 0;
+
+var horaAtual;
+var hora;
+var fundoSapo;
+var fundoGirino;
+
+var PATH = "../../";
+ 
+var tipo = 0;
+var primeiraVez = 0;
+
+var moedas = 0;
+var qntDinheiro;
+
+var segundos_i;
+var segundos = 0;
+var minutos = 0;
+var horas = 0;
+var repetidor = 0;
+
+//Barrinhas
+var pctSaude;
+var pctDiversao;
+var pctAlimentacao;
+
+var saude;
+var comida;
+var diversao;
+
+var spawnX = 150;
+var spawnY = 75;
+
+var isPaused = false;
+
+class menuInicial extends Phaser.Scene{
+    constructor (){
+        super({ key: 'menuInicial' });
+    }
+
+    preload (){
+        this.load.image('fundoMenuInicial',PATH + 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+        this.load.image('logo', PATH + 'addons/jogo/imagens/logo/logo.png');
+        this.load.image('jogar', PATH + 'addons/jogo/imagens/icones/botaoJogar.png');
+        this.load.image('ajuda', PATH + 'addons/jogo/imagens/icones/botaoAjuda.png');
+    }
+
+    create (){
+    	
+        //Fundo
+        let fundoMenuInicial = this.add.sprite(0, 0, 'fundoMenuInicial').setDisplaySize(950,450);
+        fundoMenuInicial.setOrigin(0, 0);
+
+        let logo = this.add.image(this.sys.game.config.width / 2, 100,'logo');
+        this.jogar = this.add.image(this.sys.game.config.width / 2, 270,'jogar').setInteractive();
+        this.ajuda = this.add.image(this.sys.game.config.width / 2, 350,'ajuda').setInteractive();
+        
+        this.jogar.setDisplaySize(255,65);
+        this.ajuda.setDisplaySize(255,65);
+        
+        this.jogar.on('pointerdown', function () {
+        	
+        	$.ajax({
+				type: "POST",
+				url: PATH + "ConsultaVivos",
+				success: function(sapo){
+					console.log(sapo);
+					pctDiversao = sapo.diversao;
+					pctSaude = sapo.limpeza;
+					pctAlimentacao = sapo.alimentacao;
+					
+					console.log("D "+pctDiversao);
+					console.log("S "+pctSaude);
+					console.log("A "+pctAlimentacao);
+									
+				},
+				error: function(info){
+					alert("Erro ao consultar a porcentagem das barrinhas do sapo: "+ info.status + " - " + info.statusText);
+				}
+			});
+        	
+        	$.ajax({
+				type: "POST",
+				url: PATH + "ConsultaSapos",
+				success: function(situacao){
+					
+					if(situacao == 0){
+						
+						$.ajax({
+							type: "POST",
+							url: PATH + "InsereSapos",
+							success: function(){
+								game.scene.start('ovoDoGirino');
+							},
+							error: function(info){
+								alert("Erro ao adicionar o sapo: "+ info.status + " - " + info.statusText);
+							}
+						});
+						
+					}else if(situacao == 1){
+						
+						$.ajax({
+							type: "POST",
+							url: PATH + "ConsultaVivos",
+							success: function(sapo){
+								
+								if(sapo.tempo == "00:00:00"){
+									chamaOvo();
+								}else if ((sapo.tempo >= "00:00:01") && (sapo.tempo <= "00:09:59")){
+									chamaGirino();
+								}else {
+									game.scene.start('sapo');
+								}
+								
+							},
+							error: function(info){
+								alert("Erro ao consultar o tempo do sapo: "+ info.status + " - " + info.statusText);
+							}
+						});
+												
+					}
+				},
+				error: function(info){
+					alert("Erro ao consultar os sapos: "+ info.status + " - " + info.statusText);
+				}
+			});
+        	
+            this.scene.stop('menuInicial');
+
+        }, this);
+        
+        this.ajuda.on('pointerdown', function () {
+
+            this.scene.start('ajuda');
+
+        }, this);
+    }
+}
+
+class ovoDoGirino extends Phaser.Scene{
+    constructor (){
+        super({ key: 'ovoDoGirino' });
+    }
+
+    preload (){
+        this.load.image('fundo', PATH + 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+        this.load.image('ovo', PATH + 'addons/jogo/imagens/ovos/ovo.png');
+        this.load.image('ovo1', PATH + 'addons/jogo/imagens/ovos/ovo1.png');
+        this.load.image('ovo2', PATH + 'addons/jogo/imagens/ovos/ovo2.png');
+        this.load.image('ovo3', PATH + 'addons/jogo/imagens/ovos/ovo3.png');
+        this.load.image('ovo4', PATH + 'addons/jogo/imagens/ovos/ovo4.png');
+        this.load.image('ovo5', PATH + 'addons/jogo/imagens/ovos/ovo5.png');
+        this.load.image('ovo6', PATH + 'addons/jogo/imagens/ovos/ovo6.png');
+        this.load.image('ovo7', PATH + 'addons/jogo/imagens/ovos/ovo7.png');
+        this.load.image('ovo8', PATH + 'addons/jogo/imagens/ovos/ovo8.png');
+        this.load.image('girino', PATH + 'addons/jogo/imagens/coresGirinos/girino1.png');
+        
+    }
+
+    create (){
+    	
+        //Fundo
+        let fundo = this.add.sprite(0, 0, 'fundo').setDisplaySize(950,450);
+        fundo.setOrigin(0, 0);
+        
+        this.texto = this.add.text(200, 95, 'Clique para chocar o ovo!', { fontSize: '40px', fill: '#ffffff' });
+        
+        this.ovo = this.add.image(this.sys.game.config.width / 2, 270,'ovo').setInteractive();
+        this.ovo.setDisplaySize(250,250);
+        
+        
+        this.ovo.on('pointerdown', function () {
+        	this.ovo.destroy();
+        	this.ovo1 = this.add.sprite(this.sys.game.config.width / 2, 270,'ovo1').setInteractive();
+        	this.ovo1.setDisplaySize(250,250);
+        	this.cameras.main.shake(150);
+        	
+        	this.ovo1.on('pointerdown', function () {
+        		this.ovo1.destroy();
+            	this.ovo2 = this.add.sprite(this.sys.game.config.width / 2, 270,'ovo2').setInteractive();
+            	this.ovo2.setDisplaySize(250,250);
+            	this.cameras.main.shake(150);
+            	
+            	this.ovo2.on('pointerdown', function () {
+            		this.ovo2.destroy();
+                	this.ovo3 = this.add.sprite(this.sys.game.config.width / 2, 270,'ovo3').setInteractive();
+                	this.ovo3.setDisplaySize(250,250);
+                	this.cameras.main.shake(150);
+                	
+                	this.ovo3.on('pointerdown', function () {
+                		this.ovo3.destroy();
+                    	this.ovo4 = this.add.sprite(this.sys.game.config.width / 2, 270,'ovo4').setInteractive();
+                    	this.ovo4.setDisplaySize(250,250);
+                    	this.cameras.main.shake(150);
+                    	
+                    	this.ovo4.on('pointerdown', function () {
+                    		this.ovo4.destroy();
+                        	this.ovo5 = this.add.sprite(this.sys.game.config.width / 2, 270,'ovo5').setInteractive();
+                        	this.ovo5.setDisplaySize(250,250);
+                        	this.cameras.main.shake(150);
+                        	
+                        	this.ovo5.on('pointerdown', function () {
+                        		this.ovo5.destroy();
+                            	this.ovo6 = this.add.sprite(this.sys.game.config.width / 2, 270,'ovo6').setInteractive();
+                            	this.ovo6.setDisplaySize(250,250);
+                            	this.cameras.main.shake(150);
+                            	
+                            	this.ovo6.on('pointerdown', function () {
+                            		this.ovo6.destroy();
+                                	this.ovo7 = this.add.sprite(this.sys.game.config.width / 2, 270,'ovo7').setInteractive();
+                                	this.ovo7.setDisplaySize(250,250);
+                                	this.cameras.main.shake(150);
+                                	
+                                	this.ovo7.on('pointerdown', function () {
+                                		this.ovo7.destroy();
+                                    	this.ovo8 = this.add.sprite(this.sys.game.config.width / 2, 270,'ovo8').setInteractive();
+                                    	this.ovo8.setDisplaySize(250,250);
+                                    	this.cameras.main.shake(500);
+                                    	
+                                    	this.ovo8.on('pointerdown', function () {
+                                    		this.ovo8.destroy();
+                                        	this.cameras.main.shake(1000);
+                                        	
+                                        	primeiraVez = 1;
+                                        	
+                                        	this.scene.start('girino')
+                                        	this.scene.stop('ovoDoGirino')
+                                        	
+                                        	
+                                    	}, this);
+                                	}, this);
+                            	}, this);
+                        	}, this);
+                    	}, this);
+                	}, this);
+            	}, this);
+        	}, this);
+        }, this);
+    }
+    
+    update(){
+    
+    }
+
+}
+
+class ajuda extends Phaser.Scene{
+	
+	constructor (){
+        super({ key: 'ajuda' });
+    }
+	
+	preload(){
+		 this.load.image('fundo', PATH + 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+		 this.load.image('retangulo', PATH + 'addons/jogo/imagens/fundo/retanguloPreto.png')
+		 this.load.image('logo', PATH + 'addons/jogo/imagens/logo/logo.png');
+	}
+	
+	create(){
+		
+		// Fundo
+        let fundo = this.add.sprite(0, 0, 'fundo').setDisplaySize(950,450);
+        fundo.setOrigin(0,0);
+        let logo = this.add.image(this.sys.game.config.width / 2, 100,'logo');
+        
+        // Retangulo
+        let retangulo = this.add.sprite(this.sys.game.config.width / 2, 320, 'retangulo').setDisplaySize(880,300);
+		
+		// Texto de Ajuda
+		this.AjudaText = this.add.text(130, 250, '	Nesse jogo seu trabalho será cuidar do nosso querido Zulu, bem como o '
+				+ 'alimentar, divertir, e manter a limpeza de sua lagoa. Para isso você '
+				+ 'terá a ajuda de uma belíssima loja onde poderá encontrar alimentos e '
+				+ 'também cores e acessórios para personalizar seu sapo.',
+				{ fontSize: '20px', fill: '#fff'});
+		this.AjudaText.setWordWrapWidth(700);	
+		
+		// Botão voltar 
+        this.voltarText = this.add.text(780, 20, 'Voltar', { fontSize: '30px', fill: '#fff'}).setInteractive();
+        this.voltarText.on('pointerdown', function () {
+
+                this.scene.start('menuInicial');
+                this.scene.stop('ajuda');       		        	
+        }, this);
+	}
+}
+
+
+class girino extends Phaser.Scene{
+	
+	constructor (){
+        super({ key: 'girino' });
+    }
+	
+	preload(){
+		 this.load.image('fundoGirinoDia', PATH + 'addons/jogo/imagens/fundo/fundoGirino.png');
+		 this.load.image('fundoGirinoNoite', PATH + 'addons/jogo/imagens/fundo/fundoGirinoNoite.png');
+		 this.load.image('girino', PATH + 'addons/jogo/imagens/coresGirinos/girino1.png'); 
+		 this.load.image('retanguloFundo', PATH + 'addons/jogo/imagens/fundo/retanguloAzul.png');
+		 this.load.image('quadradoFundo', PATH + 'addons/jogo/imagens/fundo/quadradoAzul.png');
+		 
+		 // Icones
+		 this.load.image('dinheiro', PATH + 'addons/jogo/imagens/icones/dinheiro.png');
+		 this.load.image('controle', PATH + 'addons/jogo/imagens/icones/controle.png');
+		 this.load.image('loja', PATH + 'addons/jogo/imagens/icones/loja.png');
+		 this.load.image('inv', PATH + 'addons/jogo/imagens/icones/inventario.png');
+		 this.load.image('botaoOK', PATH + 'addons/jogo/imagens/icones/botaoOK.png')
+		 this.load.image('botaoMenu', PATH + 'addons/jogo/imagens/icones/botaoMenu.png');
+		 
+		 // Barrinha de Saude
+		 this.load.image('saude', PATH + 'addons/jogo/imagens/barrinhas/saude0.png');
+		 
+		// Barrinha de Alimentação
+		 this.load.image('comida', PATH + 'addons/jogo/imagens/barrinhas/comida0.png');
+		 
+		// Barrinha de Diversão
+		 this.load.image('diversao', PATH + 'addons/jogo/imagens/barrinhas/diversao0.png');
+	}
+	
+	create(){
+		
+		//chama a função do relogio
+		relogio(segundos, repetidor, minutos, horas);
+		
+		game.scene.stop('ovoGirino');
+		atualizarMoedas();
+		
+		$.ajax({
+			type: "POST",
+			url: PATH + "ConverteTempo",
+			success: function(sapo){
+				horas = sapo[0]+sapo[1];
+				minutos = sapo[3]+sapo[4];
+				segundos = sapo[6]+sapo[7];
+				
+				console.log(horas+":"+minutos+":"+segundos)
+			},
+			error: function(info){
+				alert("Erro ao adicionar o sapo: "+ info.status + " - " + info.statusText);
+			}
+		});
+		
+		// Sistema de horario mudar fundo (6h até 18h Dia)
+		var h = horaAtual(hora);
+		if((h < 18)&&(h > 6)){
+			// Fundo Dia
+			fundoSapo = this.add.sprite(0, 0, 'fundoGirinoDia').setDisplaySize(950,450);
+			fundoSapo.setOrigin(0,0);
+		}else {
+			// Fundo Noite
+			fundoSapo = this.add.sprite(0, 0, 'fundoGirinoNoite').setDisplaySize(950,450);
+			fundoSapo.setOrigin(0,0);
+		}
+		
+	   // Imagem do Girino
+	   let girino = this.add.sprite(510, 300, 'girino');
+	   girino.setDisplaySize(250, 250);
+       
+	   // HUD
+	   let retanguloFundo = this.add.sprite(70, 30, 'retanguloFundo');
+	   retanguloFundo.setDisplaySize(140, 45);
+	   
+	   let dinheiro = this.add.sprite(30, 30, 'dinheiro');
+	   dinheiro.setDisplaySize(40, 25);
+	   
+	   qntDinheiro = this.add.text(80, 15, '0', { fontSize: '30px', fill: '#fff'});
+	   
+	   // Barrinhas
+	   this.saude_barra = this.add.graphics();
+	   this.saude = this.add.sprite(100, 130, 'saude');
+	   this.saude.setDisplaySize(200, 90);
+	   this.saude_barra.fillStyle(0x23a318, 1);
+       this.saude_barra.fillRect(32.5, 92, 1.6*pctSaude  , 30);
+      
+       this.comida_barra = this.add.graphics();
+	   this.comida = this.add.sprite(100, 180, 'comida');
+	   this.comida.setDisplaySize(200, 90);
+	   this.comida_barra.fillStyle(0x23a318, 1);
+	   this.comida_barra.fillRect(32.5, 142, 1.6*pctAlimentacao  , 30);
+	   
+	   this.diversao_barra = this.add.graphics();
+	   this.diversao = this.add.sprite(100, 230, 'diversao');
+	   this.diversao.setDisplaySize(200, 90);
+	   this.diversao_barra.fillStyle(0x23a318, 1);
+	   this.diversao_barra.fillRect(32.5, 192, 1.6*pctDiversao  , 30);
+	   
+	   
+	   //Barrinha Alimentação
+	   comida = this.add.sprite(100, 180, 'comida');
+	   comida.setDisplaySize(200, 90);
+	   
+	   
+	   //Barrinha Diversão
+	   diversao = this.add.sprite(100, 230, 'diversao');
+	   diversao.setDisplaySize(200, 90);
+	   
+	   //Botão do Menu
+	   this.menu = this.add.image(875, 25, 'botaoMenu');
+	   this.menu.setInteractive();
+	   this.menu.setDisplaySize(35, 30);
+	   
+	   this.menu.on('pointerdown', function(){
+		   
+		   this.scene.start('menuInterno');
+		   
+	   } ,this);
+	   
+	   this.loja = this.add.image(875, 70, 'loja');
+	   this.loja.setInteractive();
+	   this.loja.setDisplaySize(35, 40);
+	   
+	   this.loja.on('pointerdown', function () {
+		   
+           this.scene.start('coresLoja');          
+           tipo = 0;
+           
+       }, this);
+	   
+	   this.controle = this.add.sprite(875, 145, 'controle');
+       this.controle.setDisplaySize(35, 30);
+       this.controle.setInteractive();
+       
+       this.controle.on('pointerdown', function () {
+    	   
+    	   tipo = 0;
+           this.scene.start('jogoDaMemoria');
+
+       } ,this);
+	   
+	   this.inv = this.add.sprite(875, 110, 'inv');
+       this.inv.setInteractive();
+       this.inv.setDisplaySize(35, 30);
+              
+       this.inv.on('pointerdown', function () {
+
+           this.scene.start('acessoriosInv');
+           tipo = 0;
+
+       } ,this);
+	   
+	   if(primeiraVez == 1){
+		   // Imagem do Fundo
+		   this.msg = this.add.sprite(450, 225, 'quadradoFundo');
+		   this.msg.setDisplaySize(300, 300);
+		   
+		   // Texto de Ajuda
+		   this.msgText = this.add.text(320, 150, '	Esse é Zulu, por enquanto ele ainda é um girino, mas com a ajuda de seus cuidados em breve se tornará um lindo sapo.',{ fontSize: '20px', fill: '#fff'});
+		   this.msgText.setWordWrapWidth(270);	
+		
+		   // Botão OK 
+		   this.okBotao = this.add.sprite(450, 340, 'botaoOK');
+		   this.okBotao.setInteractive();
+		   this.okBotao.setDisplaySize(40, 40);
+		   this.okBotao.on('pointerdown', function () {
+			   this.msg.destroy();
+			   this.msgText.destroy();
+			   this.okBotao.destroy();
+			   primeiraVez = 0;
+		   }, this);
+	   } else{
+		   primeiraVez = 1;
+	   }
+	   	   
+	}
+	
+	update(){
+		
+		//Faz a contagem de 10 min para mudar para Sapo
+		if(minutos == 10){
+			chamaSapo();
+			primeiraVez = 1;
+		}
+		
+		// Chama a função de pegar hora atual
+		horaAtual();
+		
+	}
+    
+}
+
+class sapo extends Phaser.Scene{
+	
+	constructor (){		
+        super({ key: 'sapo' });
+    }
+	
+	preload(){		
+		 this.load.image('fundoSapoDia', PATH + 'addons/jogo/imagens/fundo/fundoSapo.png');
+		 this.load.image('fundoSapoNoite', PATH + 'addons/jogo/imagens/fundo/fundoSapoNoite.png');
+		 this.load.image('sapo', PATH + 'addons/jogo/imagens/coresSapo/sapoOficial.png');
+		 this.load.image('retanguloFundoSapo', PATH + 'addons/jogo/imagens/fundo/retanguloAzul.png');
+		 this.load.image('quadradoFundo', PATH + 'addons/jogo/imagens/fundo/quadradoAzul.png');
+		 
+		 // Icones
+		 this.load.image('dinheiro', PATH + 'addons/jogo/imagens/icones/dinheiro.png');
+		 this.load.image('controle', PATH + 'addons/jogo/imagens/icones/controle.png');
+		 this.load.image('loja', PATH + 'addons/jogo/imagens/icones/loja.png');
+		 this.load.image('inv', PATH + 'addons/jogo/imagens/icones/inventario.png');
+		 this.load.image('botaoOK', PATH + 'addons/jogo/imagens/icones/botaoOK.png');
+		 this.load.image('botaoMenu', PATH + 'addons/jogo/imagens/icones/botaoMenu.png');
+		 
+		// Barrinha de Saude
+		 this.load.image('saude', PATH + 'addons/jogo/imagens/barrinhas/saude0.png');
+		 
+		// Barrinha de Alimentação
+		 this.load.image('comida', PATH + 'addons/jogo/imagens/barrinhas/comida0.png');
+		 
+		// Barrinha de Diversão
+		 this.load.image('diversao', PATH + 'addons/jogo/imagens/barrinhas/diversao0.png');
+	}
+	
+	create(){
+		
+		//chama a função do relogio
+		relogio(segundos, repetidor, minutos, horas);
+		
+		game.scene.stop('girino');
+		atualizarMoedas();
+		
+		$.ajax({
+			type: "POST",
+			url: PATH + "ConverteTempo",
+			success: function(sapo){
+				horas = sapo[0]+sapo[1];
+				minutos = sapo[3]+sapo[4];
+				segundos = sapo[6]+sapo[7];
+			},
+			error: function(info){
+				alert("Erro ao adicionar o sapo: "+ info.status + " - " + info.statusText);
+			}
+		});
+		
+		// Sistema de horario mudar fundo (6h até 18h Dia)
+		var h = horaAtual(hora);
+		if((h < 18)&&(h > 6)){
+			// Fundo Dia
+			fundoSapo = this.add.sprite(0, 0, 'fundoSapoDia').setDisplaySize(950,450);
+			fundoSapo.setOrigin(0,0);
+		}else {
+			// Fundo Noite
+			fundoSapo = this.add.sprite(0, 0, 'fundoSapoNoite').setDisplaySize(950,450);
+			fundoSapo.setOrigin(0,0);
+		}
+		
+       // Imagem do sapo
+       let sapo = this.add.sprite(this.sys.game.config.width / 2, this.sys.game.config.height / 2, 'sapo');
+       sapo.setDisplaySize(250, 250);
+              
+       // HUD       
+       let retanguloFundoSapo = this.add.sprite(70, 30, 'retanguloFundoSapo');
+	   retanguloFundoSapo.setDisplaySize(140, 45);
+	   
+	   let dinheiro = this.add.sprite(30, 30, 'dinheiro');
+	   dinheiro.setDisplaySize(40, 25);
+	   
+	   qntDinheiro = this.add.text(80, 15, '0', { fontSize: '30px', fill: '#fff'});
+	   
+	   // Barrinhas
+	   this.saude_barra = this.add.graphics();
+	   this.saude = this.add.sprite(100, 130, 'saude');
+	   this.saude.setDisplaySize(200, 90);
+	   this.saude_barra.fillStyle(0x23a318, 1);
+       this.saude_barra.fillRect(32.5, 92, 1.6*pctSaude  , 30);
+      
+       this.comida_barra = this.add.graphics();
+	   this.comida = this.add.sprite(100, 180, 'comida');
+	   this.comida.setDisplaySize(200, 90);
+	   this.comida_barra.fillStyle(0x23a318, 1);
+	   this.comida_barra.fillRect(32.5, 142, 1.6*pctAlimentacao  , 30);
+	   
+	   this.diversao_barra = this.add.graphics();
+	   this.diversao = this.add.sprite(100, 230, 'diversao');
+	   this.diversao.setDisplaySize(200, 90);
+	   this.diversao_barra.fillStyle(0x23a318, 1);
+	   this.diversao_barra.fillRect(32.5, 192, 1.6*pctDiversao  , 30);
+	   
+	   this.menu = this.add.image(875, 25, 'botaoMenu');
+	   this.menu.setInteractive();
+	   this.menu.setDisplaySize(35, 30);
+	   
+	   this.menu.on('pointerdown', function(){
+		   
+		   this.scene.start('menuInterno');
+		   
+	   } ,this);
+	   
+	   this.loja = this.add.image(875, 70, 'loja');
+	   this.loja.setInteractive();
+	   this.loja.setDisplaySize(35, 40);
+	   
+	   this.loja.on('pointerdown', function () {
+		   
+           this.scene.start('coresLoja');          
+           tipo = 1;
+           
+       }, this);
+	   
+	   this.controle = this.add.sprite(875, 145, 'controle');
+       this.controle.setDisplaySize(35, 30);
+       this.controle.setInteractive();
+       
+       this.controle.on('pointerdown', function () {
+
+           this.scene.start('jogoDaMemoria');
+           tipo = 1;
+
+       } ,this);
+	   
+	   this.inv = this.add.sprite(875, 110, 'inv');
+       this.inv.setInteractive();
+       this.inv.setDisplaySize(35, 30);
+              
+       this.inv.on('pointerdown', function () {
+
+           this.scene.start('acessoriosInv');
+           tipo = 1;
+
+       } ,this);
+       
+       if(primeiraVez == 1){
+		   // Imagem do Fundo
+		   this.msg = this.add.sprite(450, 225, 'quadradoFundo');
+		   this.msg.setDisplaySize(300, 300);
+		   
+		   // Texto de Bem-Vindo
+		   this.msgText = this.add.text(320, 150, '	Olha só o Zulu finalmente se transformou em um sapo continue cuidando dele, visite a loja para ver as novidades.',{ fontSize: '20px', fill: '#fff'});
+		   this.msgText.setWordWrapWidth(270);
+		
+		   // Botão OK 
+		   this.okBotao = this.add.sprite(450, 340, 'botaoOK');
+		   this.okBotao.setInteractive();
+		   this.okBotao.setDisplaySize(40, 40);
+		   this.okBotao.on('pointerdown', function () {
+			   this.msg.destroy();
+			   this.msgText.destroy();
+			   this.okBotao.destroy();
+			   primeiraVez = 0;
+		   }, this);
+	   } else{
+		   primeiraVez = 1;
+	   }
+	}
+	
+	update(){	
+		
+		// Chama a função de pegar hora atual
+		horaAtual();
+	}
+}
+
+class menuInterno extends Phaser.Scene{
+	
+	constructor() {
+		super({ key: 'menuInterno'});
+	}	
+	
+	preload() {
+		this.load.image('fundoMenuInterno',PATH + 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+        this.load.image('logo', PATH + 'addons/jogo/imagens/logo/logo.png');
+        this.load.image('salvar', PATH + 'addons/jogo/imagens/icones/botaoSalvar.png');
+        this.load.image('pausar', PATH + 'addons/jogo/imagens/icones/botaoPausar.png');
+        this.load.image('continuar', PATH + 'addons/jogo/imagens/icones/botaoContinuar.png');
+        this.load.image('reiniciar', PATH + 'addons/jogo/imagens/icones/botaoReiniciar.png');
+	}
+	
+	create() {
+		
+		//chama a função do relogio
+		relogio(segundos, repetidor, minutos, horas);
+		
+		//Fundo
+        let fundoMenuInterno = this.add.sprite(0, 0, 'fundoMenuInterno').setDisplaySize(950,450);
+        fundoMenuInterno.setOrigin(0, 0);
+        
+        //Botão voltar 
+	     this.voltarText = this.add.text(795, 5, 'Voltar', { fontSize: '30px', fill: '#fff'}).setInteractive();
+	     this.voltarText.on('pointerdown', function () {
+	    	 
+	    	 atualizaDados();
+	    	 	    	 
+	    	 if (tipo==0){
+	        		this.scene.start('girino');
+	        		this.scene.stop('menuInterno');  
+	        	}else if (tipo==1){
+	    	        this.scene.start('sapo');
+	    	        this.scene.stop('menuInterno');       		
+	        	}
+	    	 
+	     }, this);
+
+	    //Imagens
+        let logo = this.add.image(this.sys.game.config.width / 2, 100,'logo');
+        this.salvar = this.add.image(this.sys.game.config.width / 2, 240,'salvar').setInteractive();
+        this.pausar = this.add.image(this.sys.game.config.width / 2, 315, 'pausar').setInteractive();        
+        this.reiniciar = this.add.image(this.sys.game.config.width / 2, 405,'reiniciar').setInteractive();
+        
+        this.salvar.setDisplaySize(255,75);
+        this.pausar.setDisplaySize(258,75);
+        this.reiniciar.setDisplaySize(250,90);
+        
+        this.salvar.on('pointerdown', function () {
+        	
+        	//Chama a função para atualizar o banco de dados
+        	atualizaDados();
+        	
+        	//Avisa o jogador que foi salvo
+        	alert("O seu jogo foi salvo com sucesso!");
+        }, this);
+        
+        this.pausar.on('pointerdown', function () {      	      
+        		        	
+        		//muda a variável 
+        		isPaused = true;     
+        		
+        		        			
+        			//mudar botão pausar para continuar         	       
+        		    var continuar = this.add.image(this.sys.game.config.width / 2, 325, 'continuar').setInteractive();
+        		    continuar.setDisplaySize(250,85);
+        			
+        		    continuar.on('pointerdown', function (){        	         		             
+         		       isPaused = false;
+         		      continuar.destroy(); 
+         		    });
+        	      		         		       	        	          	        
+        }, this);      
+        
+        this.reiniciar.on('pointerdown', function () {
+        	
+        	//não faço ideia de como fazer isso daqui
+        	
+        }, this);
+        
+       primeiraVez = 0;        
+		
+	}
+	
+	update() {
+				
+		// Chama a função de pegar hora atual
+		horaAtual();
+	}
+}
+
+class acessoriosLoja extends Phaser.Scene{
+	
+    constructor (){
+        super({ key: 'acessoriosLoja' });
+    }
+
+    preload (){
+    	//Fundo
+    	this.load.image('fundoDesfocado', 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+    	this.load.image('retanguloFundo', 'addons/jogo/imagens/fundo/retanguloAzul.png');
+    	
+    	//imagens dos produtos - Acessorios
+    	this.load.image('bone', PATH + 'addons/jogo/imagens/acessorios/Bone.png');
+		this.load.image('aniversario', PATH + 'addons/jogo/imagens/acessorios/Aniversario.png');
+		this.load.image('sombrero', PATH + 'addons/jogo/imagens/acessorios/sombrero.png');    
+		this.load.image('coracao', PATH + 'addons/jogo/imagens/acessorios/coracao.png');
+		this.load.image('perolas', PATH + 'addons/jogo/imagens/acessorios/perolas.png');
+		this.load.image('mergulho', PATH + 'addons/jogo/imagens/acessorios/mergulho.png');
+		this.load.image('quadrado', PATH + 'addons/jogo/imagens/acessorios/quadrado.png');
+		this.load.image('redondo', PATH + 'addons/jogo/imagens/acessorios/redondo.png');   
+    }
+
+    create (){
+    	  //Fundo
+    	    let fundoDesfocado = this.add.sprite(0, 0, 'fundoDesfocado').setDisplaySize(950,450);
+    	    fundoDesfocado.setOrigin(0,0);
+    	
+    	  //Fundo da loja - acessorios
+    	    let retanguloFundo = this.add.sprite(450, 225, 'retanguloFundo').setDisplaySize(807, 382);    	
+
+ 	      //Botão voltar 
+ 	        this.voltarText = this.add.text(795, 5, 'Voltar', { fontSize: '30px', fill: '#fff'}).setInteractive();
+ 	        this.voltarText.on('pointerdown', function () {
+ 	        	
+ 	        	 if (tipo==0){
+ 	        		this.scene.start('girino');
+ 	        	}else{
+ 	 	            this.scene.start('sapo');
+ 	 	            this.scene.stop('acessoriosLoja');      		
+ 	        	}
+ 	        	 
+ 	        }, this);
+ 	         	        	
+ 	        	//Nome das categorias
+ 		        this.acessText = this.add.text(150, 60, 'Acessórios', { fontSize: '25px', fill: '#000'}).setInteractive();
+ 		        
+ 		        this.comidasText = this.add.text(600, 60, 'Comidas', { fontSize: '25px', fill: '#fff'}).setInteractive();
+ 		        this.comidasText.on('pointerdown', function () {
+ 		            this.scene.start('comidasLoja');
+ 	 	            this.scene.stop('acessoriosLoja');
+ 		        }, this);
+ 		        
+ 		       this.coresText = this.add.text(400, 60, 'Cores', { fontSize: '25px', fill: '#fff'}).setInteractive();
+ 		        this.coresText.on('pointerdown', function () {
+ 		            this.scene.start('coresLoja');
+ 	 	            this.scene.stop('acessoriosLoja');
+ 		        }, this); 
+ 		        
+ 		     //Imagens dos produtos
+ 		        let bone = this.add.sprite(200,160, 'bone').setDisplaySize(100,100);
+ 		        let aniversario = this.add.sprite(360,150, 'aniversario').setDisplaySize(100,100);
+ 		        let sombrero = this.add.sprite(530,150, 'sombrero').setDisplaySize(200,150);
+ 		        let coracao = this.add.sprite(700,150, 'coracao').setDisplaySize(100,100);
+ 		        //let cifrao = this.add.sprite(200,250, 'cifrao').setDisplaySize(250,300);
+ 		        let perolas = this.add.sprite(200,280, 'perolas').setDisplaySize(100,100);
+ 		        let redondo = this.add.sprite(360,280, 'redondo').setDisplaySize(100,100);
+ 		        let quadrado = this.add.sprite(525,300, 'quadrado').setDisplaySize(150,150);
+ 		        let mergulho = this.add.sprite(700,280, 'mergulho').setDisplaySize(100,100);
+ 	        }	        
+}
+
+class comidasLoja extends Phaser.Scene{
+	
+	constructor(){
+		super({ key: 'comidasLoja'});
+	}
+	
+	preload(){
+		
+    	//Fundo
+    	this.load.image('fundoDesfocado', 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+    	this.load.image('retanguloFundo', 'addons/jogo/imagens/fundo/retanguloAzul.png');
+    	
+		//imagens dos produtos - Comidas
+		this.load.image('agua', PATH + 'addons/jogo/imagens/comidas/agua.png');
+		this.load.image('banana', PATH + 'addons/jogo/imagens/comidas/banana.png');
+		this.load.image('cenoura', PATH + 'addons/jogo/imagens/comidas/cenoura.png');
+		this.load.image('cupcake', PATH + 'addons/jogo/imagens/comidas/cupcake.png');
+		this.load.image('hamburguer', PATH + 'addons/jogo/imagens/comidas/hamburguer.png');
+		this.load.image('maca', PATH + 'addons/jogo/imagens/comidas/maca.png');
+		this.load.image('ovoFrito', PATH + 'addons/jogo/imagens/comidas/ovoFrito.png');
+		this.load.image('refrigerante', PATH + 'addons/jogo/imagens/comidas/refrigerante.png');
+		this.load.image('sucoLaranja', PATH + 'addons/jogo/imagens/comidas/sucoLaranja.png');
+	}
+	
+	create(){
+    	//Fundo		
+    	let fundoDesfocado = this.add.sprite(0, 0, 'fundoDesfocado').setDisplaySize(950,450);
+    	fundoDesfocado.setOrigin(0,0);
+    	
+    	//Fundo Azul
+    	let retanguloFundo = this.add.sprite(450, 225, 'retanguloFundo').setDisplaySize(807, 382);    	
+
+ 	   //Botão voltar 
+ 	        this.voltarText = this.add.text(795, 5, 'Voltar', { fontSize: '30px', fill: '#fff'}).setInteractive();
+ 	        this.voltarText.on('pointerdown', function () {
+
+ 	        	if (tipo==0){
+ 	        		this.scene.start('girino');
+ 	        	}else{
+ 	 	            this.scene.start('sapo');
+ 	 	            this.scene.stop('comidasLoja'); 	        		
+ 	        	}
+ 	        	
+ 	        }, this);	
+ 	        
+ 	       if(tipo==0){
+	        	this.comidasText = this.add.text(600, 60, 'Comidas', { fontSize: '25px', fill: '#000'}).setInteractive();
+		        this.comidasText.on('pointerdown', function () {
+		            this.scene.start('comidasLoja');
+	 	            this.scene.stop('acessoriosLoja');
+		        }, this);
+		        
+	        	this.coresText = this.add.text(400, 60, 'Cores', { fontSize: '25px', fill: '#fff'}).setInteractive();
+		        this.coresText.on('pointerdown', function () {
+		            this.scene.start('coresLoja');
+	 	            this.scene.stop('acessoriosLoja');
+		        }, this);
+	        }else {
+	        	//Nome das categorias
+		        this.acessText = this.add.text(150, 60, 'Acessórios', { fontSize: '25px', fill: '#fff'}).setInteractive();
+		        this.acessText.on('pointerdown', function () {
+		            this.scene.start('acessoriosLoja');
+		            this.scene.stop('comidasLoja');
+		        }, this);
+		        	        
+		        this.comidasText = this.add.text(600, 60, 'Comidas', { fontSize: '25px', fill: '#000'}).setInteractive();
+		        
+		       this.coresText = this.add.text(400, 60, 'Cores', { fontSize: '25px', fill: '#fff'}).setInteractive();
+		        this.coresText.on('pointerdown', function () {
+		            this.scene.start('coresLoja');
+		            this.scene.stop('comidasLoja');
+		        }, this);
+		        
+	        }
+ 	        
+ 	    //Imagens dos produtos
+	        let hamburguer = this.add.sprite(200,130, 'hamburguer').setDisplaySize(100,100);
+	        let cupcake = this.add.sprite(360,130, 'cupcake').setDisplaySize(100,100);
+	        let maca = this.add.sprite(530,140, 'maca').setDisplaySize(100,100);
+	        let banana = this.add.sprite(700,140, 'banana').setDisplaySize(100,100);
+	        let sucoLaranja = this.add.sprite(200,290, 'sucoLaranja').setDisplaySize(100,100);
+	        let agua = this.add.sprite(360,290, 'agua').setDisplaySize(100,100);
+	        let refrigerante = this.add.sprite(530,290, 'refrigerante').setDisplaySize(100,100);
+	        let cenoura = this.add.sprite(700,290, 'cenoura').setDisplaySize(100,100);
+	        //let ovoFrito = this.add.sprite(700,280, 'ovoFrito').setDisplaySize(100,100);
+	}
+}
+
+class coresLoja extends Phaser.Scene{
+	
+	constructor(){
+		super({ key: 'coresLoja'});
+	}
+	
+	preload(){		
+    	//Fundo
+    	this.load.image('fundoDesfocado', PATH + 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+    	this.load.image('retanguloFundo', PATH + 'addons/jogo/imagens/fundo/retanguloAzul.png');
+    	
+    	//imagens dos produtos - Cores - Sapo
+		this.load.image('sapoVermelho', PATH + 'addons/jogo/imagens/coresSapo/sapoVermelho.png');
+		this.load.image('sapoLaranja', PATH + 'addons/jogo/imagens/coresSapo/sapoLaranja.png');
+		this.load.image('sapoAmarelo', PATH + 'addons/jogo/imagens/coresSapo/sapoAmarelo.png');
+		this.load.image('sapoRosa', PATH + 'addons/jogo/imagens/coresSapo/sapoRosa.png');
+		this.load.image('sapoAzul', PATH + 'addons/jogo/imagens/coresSapo/sapoAzul.png');
+		this.load.image('sapoRoxo', PATH + 'addons/jogo/imagens/coresSapo/sapoRoxo.png');
+		
+		//imagens dos produtos - Cores - Girino
+		this.load.image('girinoAzul', PATH + 'addons/jogo/imagens/coresGirinos/girinoAzul.png');
+		this.load.image('girinoLaranja', PATH + 'addons/jogo/imagens/coresGirinos/girinoLaranja.png');
+		this.load.image('girinoCinza', PATH + 'addons/jogo/imagens/coresGirinos/girinoCinza.png');
+		this.load.image('girinoRosa', PATH + 'addons/jogo/imagens/coresGirinos/girinoRosa.png');
+		this.load.image('girinoRoxo', PATH + 'addons/jogo/imagens/coresGirinos/girinoRoxo.png');
+		this.load.image('girino2', PATH + 'addons/jogo/imagens/coresGirinos/girino2.png');
+		
+	}
+	
+	create(){
+    	//Fundo		
+    	let fundoDesfocado = this.add.sprite(0, 0, 'fundoDesfocado').setDisplaySize(950,450);
+    	fundoDesfocado.setOrigin(0,0);
+    	
+    	//Fundo da loja - cores
+    	let retanguloFundo = this.add.sprite(450, 225, 'retanguloFundo').setDisplaySize(807, 382);    	
+
+ 	    //Botão voltar 
+ 	        this.voltarText = this.add.text(795, 5, 'Voltar', { fontSize: '30px', fill: '#fff'}).setInteractive();
+ 	        this.voltarText.on('pointerdown', function () {
+
+ 	        	if (tipo==0){
+ 	        		this.scene.start('girino');
+ 	        	}else{
+ 	 	            this.scene.start('sapo');
+ 	 	            this.scene.stop('coresLoja'); 	        		
+ 	        	}
+ 	        	
+ 	        }, this);		
+ 	        
+ 	       if(tipo==0){
+	        	this.comidasText = this.add.text(600, 60, 'Comidas', { fontSize: '25px', fill: '#fff'}).setInteractive();
+		        this.comidasText.on('pointerdown', function () {
+		            this.scene.start('comidasLoja');
+	 	            this.scene.stop('acessoriosLoja');
+		        }, this);
+		        
+	        	this.coresText = this.add.text(400, 60, 'Cores', { fontSize: '25px', fill: '#000'}).setInteractive();
+		        this.coresText.on('pointerdown', function () {
+		            this.scene.start('coresLoja');
+	 	            this.scene.stop('acessoriosLoja');
+		        }, this);
+		        
+		        //Imagens dos produtos - girino
+		        	 let girinoAzul = this.add.sprite(200,130, 'girinoAzul').setDisplaySize(100,100);
+		        	 let girinoLaranja = this.add.sprite(360,130, 'girinoLaranja').setDisplaySize(100,100);
+				     let girinoCinza = this.add.sprite(530,140, 'girinoCinza').setDisplaySize(100,100);
+				     let girinoRosa = this.add.sprite(700,140, 'girinoRosa').setDisplaySize(100,100);
+				     let girinoRoxo = this.add.sprite(200,290, 'girinoRoxo').setDisplaySize(100,100);
+				     let girino2 = this.add.sprite(360,290, 'girino2').setDisplaySize(100,100);
+	        }else {
+	        	//Nome das categorias
+		        this.acessText = this.add.text(150, 60, 'Acessórios', { fontSize: '25px', fill: '#fff'}).setInteractive();
+		        this.acessText.on('pointerdown', function () {
+		            this.scene.start('acessoriosLoja');
+		            this.scene.stop('coresLoja');
+		        }, this);
+		        	        
+		        this.comidasText = this.add.text(600, 60, 'Comidas', { fontSize: '25px', fill: '#fff'}).setInteractive();
+		        this.comidasText.on('pointerdown', function () {
+		            this.scene.start('comidasLoja');
+		            this.scene.stop('coresLoja');
+		        }, this);
+		        
+		       this.coresText = this.add.text(400, 60, 'Cores', { fontSize: '25px', fill: '#000'}).setInteractive();
+		       
+		     //Imagens dos produtos - sapo
+		        let sapoVermelho = this.add.sprite(200,130, 'sapoVermelho').setDisplaySize(100,100);
+		        let sapoLaranja = this.add.sprite(360,130, 'sapoLaranja').setDisplaySize(100,100);
+		        let sapoAmarelo = this.add.sprite(530,140, 'sapoAmarelo').setDisplaySize(100,100);
+		        let sapoRosa = this.add.sprite(700,140, 'sapoRosa').setDisplaySize(100,100);
+		        let sapoAzul = this.add.sprite(200,290, 'sapoAzul').setDisplaySize(100,100);
+		        let sapoRoxo = this.add.sprite(360,290, 'sapoRoxo').setDisplaySize(100,100);
+	        }
+	       
+	}
+}
+
+class acessoriosInv extends Phaser.Scene{
+	
+	constructor (){
+		super({ key: 'acessoriosInv'});
+	}
+	
+	preload(){
+		//Fundo
+    	this.load.image('fundoDesfocadoInv', PATH + 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+		this.load.image('retanguloDinheiro', PATH + 'addons/jogo/imagens/fundo/retanguloAzul.png');
+		this.load.image('retanguloFundo', PATH + 'addons/jogo/imagens/fundo/retanguloAzul.png');
+		this.load.image('dinheiro', PATH + 'addons/jogo/imagens/icones/dinheiro.png');
+		
+		//imagens do inventario - Acessorios
+		this.load.image('aniversario', PATH + 'addons/jogo/imagens/acessorios/Aniversario.png');
+		this.load.image('bone', PATH + 'addons/jogo/imagens/acessorios/Bone.png');
+		this.load.image('coracao', PATH + 'addons/jogo/imagens/acessorios/coracao.png');
+		this.load.image('mergulho', PATH + 'addons/jogo/imagens/acessorios/mergulho.png');
+		this.load.image('perolas', PATH + 'addons/jogo/imagens/acessorios/perolas.png');
+		this.load.image('quadrado', PATH + 'addons/jogo/imagens/acessorios/quadrado.png');
+		this.load.image('redondo', PATH + 'addons/jogo/imagens/acessorios/redondo.png');
+		this.load.image('sombrero', PATH + 'addons/jogo/imagens/acessorios/sombrero.png');
+	}
+	
+	create(){
+		//Fundo
+    	let fundoDesfocadoInv = this.add.sprite(0, 0, 'fundoDesfocadoInv').setDisplaySize(950,450);
+    	fundoDesfocadoInv.setOrigin(0,0);
+    	
+    	//Fundo do Inventário
+    	let retanguloFundo = this.add.sprite(450, 225, 'retanguloFundo').setDisplaySize(807, 382);    	
+    
+        //Botão voltar 
+        this.voltarText = this.add.text(795, 5, 'Voltar', { fontSize: '30px', fill: '#fff'}).setInteractive();
+        this.voltarText.on('pointerdown', function () {
+        	
+        	if (tipo==0){
+	        		this.scene.start('girino');
+	        	}else{
+	 	            this.scene.start('sapo');
+	 	            this.scene.stop('acessoriosInv'); 	        		
+	        	}
+            
+        }, this);
+        
+        //Nome das categorias
+        this.acessText = this.add.text(150, 60, 'Acessórios', { fontSize: '25px', fill: '#000'}).setInteractive();
+        	        
+        this.comidasText = this.add.text(600, 60, 'Comidas', { fontSize: '25px', fill: '#fff'}).setInteractive();
+        this.comidasText.on('pointerdown', function () {
+            this.scene.start('comidasInv');
+        }, this);
+        
+       this.coresText = this.add.text(400, 60, 'Cores', { fontSize: '25px', fill: '#fff'}).setInteractive();
+       this.coresText.on('pointerdown', function () {
+           this.scene.start('coresInv');
+        }, this);
+	}
+}
+
+
+class comidasInv extends Phaser.Scene{
+	
+	constructor(){
+		super({ key: 'comidasInv'});
+	}
+	
+	preload(){
+		//Fundo
+    	this.load.image('fundoDesfocadoInv', PATH + 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+		this.load.image('retanguloDinheiro', PATH + 'addons/jogo/imagens/fundo/retanguloAzul.png');
+		this.load.image('retanguloFundo', PATH + 'addons/jogo/imagens/fundo/retanguloAzul.png');
+		this.load.image('dinheiro', PATH + 'addons/jogo/imagens/icones/dinheiro.png');
+		
+		//imagens do inventario - Comidas
+		this.load.image('agua', PATH + 'addons/jogo/imagens/comidas/agua.png');
+		this.load.image('banana', PATH + 'addons/jogo/imagens/comidas/banana.png');
+		this.load.image('cenoura', PATH + 'addons/jogo/imagens/comidas/cenoura.png');
+		this.load.image('cupcake', PATH + 'addons/jogo/imagens/comidas/cupcake.png');
+		this.load.image('hamburguer', PATH + 'addons/jogo/imagens/comidas/hamburguer.png');
+		this.load.image('maca', PATH + 'addons/jogo/imagens/comidas/maca.png');
+		this.load.image('ovoFrito', PATH + 'addons/jogo/imagens/comidas/ovoFrito.png');
+		this.load.image('refrigerante', PATH + 'addons/jogo/imagens/comidas/refrigerante.png');
+		this.load.image('sucoLaranja', PATH + 'addons/jogo/imagens/comidas/sucoLaranja.png');			
+	}
+	
+	create(){
+		//Fundo
+    	let fundoDesfocadoInv = this.add.sprite(0, 0, 'fundoDesfocadoInv').setDisplaySize(950,450);
+    	fundoDesfocadoInv.setOrigin(0,0);
+    	
+    	//Fundo do Inventário
+    	let retanguloFundo = this.add.sprite(450, 225, 'retanguloFundo').setDisplaySize(807, 382);    	
+    
+        //Botão voltar 
+        this.voltarText = this.add.text(795, 5, 'Voltar', { fontSize: '30px', fill: '#fff'}).setInteractive();
+        this.voltarText.on('pointerdown', function () {
+        	
+        	if (tipo==0){
+	        		this.scene.start('girino');
+	        	}else{
+	        		this.scene.start('sapo');
+	                this.scene.stop('comidasInv'); 	        		
+	        	}
+        	
+        }, this);
+        
+        //Nome das categorias
+        this.acessText = this.add.text(150, 60, 'Acessórios', { fontSize: '25px', fill: '#fff'}).setInteractive();
+        this.acessText.on('pointerdown', function () {
+            this.scene.start('acessoriosInv');
+        }, this);
+        	        
+        this.comidasText = this.add.text(600, 60, 'Comidas', { fontSize: '25px', fill: '#000'}).setInteractive();
+                
+        this.coresText = this.add.text(400, 60, 'Cores', { fontSize: '25px', fill: '#fff'}).setInteractive();
+        this.coresText.on('pointerdown', function () {
+           this.scene.start('coresInventario');
+        }, this);
+       
+	}
+}
+
+class coresInv extends Phaser.Scene{
+	
+	constructor (){
+		super({ key: 'coresInv' });
+	}
+	
+	preload(){		
+		//Fundo
+    	this.load.image('fundoDesfocadoInv', PATH + 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+		this.load.image('retanguloDinheiro', PATH + 'addons/jogo/imagens/fundo/retanguloAzul.png');
+		this.load.image('retanguloFundo', PATH + 'addons/jogo/imagens/fundo/retanguloAzul.png');
+		this.load.image('dinheiro', PATH + 'addons/jogo/imagens/icones/dinheiro.png');
+				
+		//imagens do inventario - Cores
+		this.load.image('sapoAmarelo', PATH + 'addons/jogo/imagens/coresSapo/sapoAmarelo.png');
+		this.load.image('sapoAzul', PATH + 'addons/jogo/imagens/coresSapo/sapoAzul.png');
+		this.load.image('sapoLaranja', PATH + 'addons/jogo/imagens/coresSapo/sapoLaranja.png');
+		this.load.image('sapoOficial', PATH + 'addons/jogo/imagens/coresSapo/sapoOficial.png');
+		this.load.image('sapoRosa', PATH + 'addons/jogo/imagens/coresSapo/sapoRosa.png');
+		this.load.image('sapoRoxo', PATH + 'addons/jogo/imagens/coresSapo/sapoRoxo.png');
+		this.load.image('sapoVermelho', PATH + 'addons/jogo/imagens/coresSapo/sapoVermelho.png');
+	}
+	
+	create(){
+			
+			//Fundo
+	    	let fundoDesfocadoInv = this.add.sprite(0, 0, 'fundoDesfocadoInv').setDisplaySize(950,450);
+	    	fundoDesfocadoInv.setOrigin(0,0);
+	    	
+	    	//Fundo do Inventário
+	    	let retanguloFundo = this.add.sprite(450, 225, 'retanguloFundo').setDisplaySize(807, 382);    	
+	    
+	        //Botão voltar 
+	        this.voltarText = this.add.text(795, 5, 'Voltar', { fontSize: '30px', fill: '#fff'}).setInteractive();
+	        this.voltarText.on('pointerdown', function () {
+	        	
+	        	if (tipo==0){
+	        		this.scene.start('girino');
+	        	}else{
+		            this.scene.start('sapo');
+		            this.scene.stop('inventario');        		
+	        	}
+	        		            
+	        }, this);
+	        
+	        //Nome das categorias
+	        this.acessText = this.add.text(150, 60, 'Acessórios', { fontSize: '25px', fill: '#fff'}).setInteractive();
+	        this.acessText.on('pointerdown', function () {
+	            this.scene.start('acessoriosInv');
+	        }, this);
+	        	        
+	        this.comidasText = this.add.text(600, 60, 'Comidas', { fontSize: '25px', fill: '#fff'}).setInteractive();
+	        this.comidasText.on('pointerdown', function () {
+	            this.scene.start('comidasInv');
+	        }, this);
+	        
+	        this.coresText = this.add.text(400, 60, 'Cores', { fontSize: '25px', fill: '#000'}).setInteractive();
+       
+	       //Imagens dos produtos
+	       this.load.image('sapoOficial', PATH + 'addons/jogo/imagens/coresSapo/sapoOficial.png');	      
+	}	
+}
+
+class menuJogoDaMemoria extends Phaser.Scene{
+	
+	constructor (){
+		super({ key: 'menuJogoDaMemoria' });
+	}
+	
+	preload(){		
+		//Fundo
+    	this.load.image('fundoDesfocadoMG', PATH + 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+    	this.load.image('quadradoFundo', PATH + 'addons/jogo/imagens/fundo/quadradoAzul.png');
+    	this.load.image('botaoFechar', PATH + 'addons/jogo/imagens/icones/botaoFechar.png');
+		
+	}
+	
+	create(){
+			
+			//Fundo
+	    	let fundoDesfocadoMG = this.add.sprite(0, 0, 'fundoDesfocadoMG').setDisplaySize(950,450);
+	    	fundoDesfocadoMG.setOrigin(0,0);
+	    	
+	    	//Fundo Jogo da Velha
+	    	let quadradoFundo = this.add.sprite(455, 223, 'quadradoFundo').setDisplaySize(290, 380); 
+	    	
+	    	this.dificuldade = this.add.text(350, 95, 'Dificuldade', { fontSize: '35px', fill: '#fff'}).setInteractive();
+	    	this.facil = this.add.text(420, 150, 'Fácil', { fontSize: '25px', fill: '#000'}).setInteractive();
+	    	this.medio = this.add.text(420, 200, 'Médio', { fontSize: '25px', fill: '#000'}).setInteractive();
+	    	this.dificil = this.add.text(400, 250, 'Difícil', { fontSize: '25px', fill: '#000'}).setInteractive();
+	    	
+	    	//Botão voltar 
+ 	        this.voltarImg = this.add.sprite(580, 50, 'botaoFechar').setDisplaySize(40, 40);
+ 	        this.voltarImg.setInteractive();
+ 	        this.voltarImg.on('pointerdown', function () {
+ 	        	if (tipo==0){
+ 	        		this.scene.start('girino');
+ 	        	}else{
+ 	 	            this.scene.start('sapo');
+ 	 	            this.scene.stop('jogoDaMemoria'); 
+ 	        	}
+ 	        	primeiraVez = 0;
+ 	        }, this);	
+	    	      
+	}	
+}
+
+class jogoDaMemoria extends Phaser.Scene{
+	
+	constructor (){
+		super({ key: 'jogoDaMemoria' });
+	}
+	
+	preload(){		
+		//Fundo
+    	this.load.image('fundoDesfocadoMG', PATH + 'addons/jogo/imagens/fundo/fundoDesfocado.png');
+    	this.load.image('retanguloFundo', PATH + 'addons/jogo/imagens/fundo/retanguloAzul.png');
+    	this.load.image('botaoFechar', PATH + 'addons/jogo/imagens/icones/botaoFechar.png');
+    	this.load.image('cartaInterrogacao', PATH + 'addons/jogo/imagens/cartasJogoMemoria/interrogacao.png');
+    	this.load.image('carta0', PATH + 'addons/jogo/imagens/cartasJogoMemoria/carta1.png');
+    	this.load.image('carta1', PATH + 'addons/jogo/imagens/cartasJogoMemoria/carta2.png');
+    	this.load.image('carta2', PATH + 'addons/jogo/imagens/cartasJogoMemoria/carta3.png');
+    	this.load.image('carta3', PATH + 'addons/jogo/imagens/cartasJogoMemoria/carta4.png');
+    	this.load.image('carta4', PATH + 'addons/jogo/imagens/cartasJogoMemoria/carta5.png');
+    	this.load.image('carta5', PATH + 'addons/jogo/imagens/cartasJogoMemoria/carta6.png');
+    	this.load.image('carta6', PATH + 'addons/jogo/imagens/cartasJogoMemoria/carta7.png');
+    	this.load.image('carta7', PATH + 'addons/jogo/imagens/cartasJogoMemoria/carta8.png');
+    	this.load.image('reiniciar', PATH + 'addons/jogo/imagens/icones/botaoReiniciar.png');
+		this.clicks= 0 ;
+		this.cartaClicada;
+		this.canClick=true;
+	}
+	
+	clica(carta){
+		if(this.canClick){
+			
+		this.clicks++;
+		carta.setTexture('carta'+carta.id);
+		if(this.clicks==1){
+			this.cartaClicada = carta;
+		}else{
+			this.canClick= false;
+			setTimeout(()=>{
+				console.log(this)
+				if(carta.id!==this.cartaClicada.id){					
+				carta.setTexture("cartaInterrogacao");
+				this.cartaClicada.setTexture("cartaInterrogacao");
+				this.clicks = 0; 
+				this.canClick =true;
+				}else{
+					//Aqui tem que adicionar os pontos no bd
+					carta.destroy();
+					this.cartaClicada.destroy()
+					this.clicks = 0 ;
+					this.canClick=true;
+				}
+			},1000)
+		}
+		}
+
+	}
+	create(){
+			
+			//Fundo
+	    	let fundoDesfocadoMG = this.add.sprite(0, 0, 'fundoDesfocadoMG').setDisplaySize(950,450);
+	    	fundoDesfocadoMG.setOrigin(0,0);
+	    	
+	    	//Fundo Jogo da Velha
+	    	let retanguloFundo = this.add.sprite(455, 223, 'retanguloFundo').setDisplaySize(935, 470);  
+	    	
+	    	//Botão voltar 
+ 	        this.voltarImg = this.add.sprite(884, 25, 'botaoFechar').setDisplaySize(40, 40);
+ 	        this.voltarImg.setInteractive();
+ 	        this.voltarImg.on('pointerdown', function () {
+ 	        	if (tipo==0){
+ 	        		this.scene.start('girino');
+ 	        	}else{
+ 	 	            this.scene.start('sapo');
+ 	 	            this.scene.stop('jogoDaMemoria'); 
+ 	        	}
+ 	        	spawnX = 150;
+ 	        	spawnY = 75;
+ 	        	primeiraVez = 0;
+ 	        }, this);	
+ 	     
+ 	        let contadoras=[0,0,0,0,0,0,0,0]
+ 	       var carta = new Array;
+ 	       for(var i = 0; i < 16; i++){
+
+ 	 	       
+ 	 	       
+ 	 	  		if( i == 4){
+ 	 	  			spawnY += 100;
+ 	 	  			spawnX = 150;
+ 	 	  		}else if( i == 8){
+ 	 	  			spawnY += 100;
+ 	 	  			spawnX = 150;
+ 	 	  		}else if( i == 12){
+ 	 	  			spawnY += 100;
+ 	 	  			spawnX = 150;
+ 	 	  		} 	  	 	  		
+ 	  		carta[i]=null
+ 	  		carta[i] = this.add.sprite(spawnX, spawnY, 'cartaInterrogacao').setDisplaySize(120, 100).setInteractive();
+ 	  		carta[i].on('pointerdown',function(){
+ 	  			this.scene.clica(this);
+ 	  		})
+ 	  		do{
+ 	  			
+ 	  		var numeroSorteado = Math.floor(Math.random() * (8 - 1 + 1)) ;
+ 	  		if(contadoras[numeroSorteado]<2){
+ 	  		
+ 	  		carta[i].id = numeroSorteado;
+ 	  		contadoras[numeroSorteado]++;
+ 	  		
+ 	  		
+ 	  		}else{
+ 	  			carta[i].id = undefined;
+ 	  		}
+ 	  		}while(carta[i].id==undefined);
+// 	  		carta[i].on('pointerdown',()=>{
+// 	  			alert(carta[i].id)
+// 	  		})
+ 	  		spawnX += 145;
+ 	       }
+ 	       this.cartas = carta;
+ 	       
+	}
+	update(){
+		this.ativo = false;
+		for(let  i=0;i<this.cartas.length;i++ ){
+			if(this.cartas[i].active==true){
+				this.ativo = true;
+			}
+		}
+		if(!this.ativo&&reiniciar == undefined){
+			 let reiniciar = this.add.sprite(475, 275, 'reiniciar').setInteractive();
+			 reiniciar.on()
+		}
+	}
+
+}	
+//Função para atualizar as Moedas
+atualizarMoedas = function (){
+	
+	$.ajax({
+		type: "POST",
+		url: PATH + "ConsultaVivos",
+		success: function(sapo){
+			
+			moedas = sapo.moedas;
+			
+			qntDinheiro.setText(moedas);
+			
+		},
+		error: function(info){
+			alert("Erro ao consultar as moedas do sapo: "+ info.status + " - " + info.statusText);
+		}
+	});
+	
+}
+
+//Função para iniciar cena Ovo
+chamaOvo = function (){
+	
+	game.scene.start('ovoDoGirino');
+	
+}
+
+//Função para iniciar cena Girino
+chamaGirino = function (){
+	
+	game.scene.start('girino');
+	
+}
+
+// Função para iniciar cena Sapo
+chamaSapo = function (){
+	
+	game.scene.stop('girino');
+	game.scene.start('sapo');
+	
+	console.log(minutos);
+	
+	
+	atualizaDados();
+	
+}
+
+atualizaDados = function(){
+	$.ajax({
+		type: "POST",
+		url: PATH + "AtualizaDados",
+		data: "diversao="+pctDiversao+"&alimentacao="+pctAlimentacao+"&limpeza="+pctSaude+"&tempo="+horas+":"+minutos+":"+segundos+ "&moedas=200&status=0&pontuacao=0&pontuacaoTotal=40&pontuacaoMaior=20",
+		success: function(sapo){
+			
+		},
+		error: function(info){
+			alert("Erro ao atualizar os dados do sapo: "+ info.status + " - " + info.statusText);
+		}
+	});
+}
+
+// Função para pegar hora atual
+horaAtual = function(){
+	
+	// Obtém a hora atual
+	var data = new Date();
+	var hora = data.getHours();// 0h-23h
+	
+	return hora;
+}
+
+//Função para tempo
+relogio = function(){
+	if(this.intervalo==undefined){			
+		this.intervalo = setInterval(function(){
+			if(segundos == 60){
+				repetidor++;
+				minutos++;
+				segundos=0;
+			}
+			
+			if(repetidor == 5){
+				atualizaDados();
+				repetidor = 0;
+			}
+
+			if(minutos == 60){
+				horas++;
+				minutos=0;
+			}	
+			
+			if(isPaused == false){				
+				segundos++;
+				console.log(horas+":"+minutos+":"+segundos);
+			}			
+		},1000);		
+	}
+	
+	
+}
+
+var config = {
+	type: Phaser.AUTO,
+	width: 950,
+	height: 450,
+	backgroundColor: '#000',
+	parent: "telaJogo",
+	scene: [ menuInicial, ajuda, ovoDoGirino, girino, sapo, menuInterno, acessoriosLoja, comidasLoja, coresLoja, acessoriosInv, comidasInv, coresInv, menuJogoDaMemoria, jogoDaMemoria]
+};
+
+var game = new Phaser.Game(config);

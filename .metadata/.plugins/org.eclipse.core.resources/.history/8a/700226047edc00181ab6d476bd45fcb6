@@ -1,0 +1,186 @@
+package br.com.zulu.jdbc;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+//import java.util.ArrayList;
+//import java.util.List;
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+import br.com.zulu.classes.Criptografia;
+import br.com.zulu.classes.Sapo;
+import br.com.zulu.classes.Usuario;
+import br.com.zulu.jdbcinterfaces.SapoDAO;
+
+public class JDBCSapoDAO implements SapoDAO {
+
+	private Connection conexao;
+
+	public JDBCSapoDAO(Connection conexao) {
+		this.conexao = conexao;
+	}
+
+	public Sapo buscarPorLogin(String login) {
+		
+		String comando = "SELECT * FROM sapos WHERE jogadores_usuario = '" + login + "'";
+		Sapo sapo = new Sapo();
+		
+		System.out.println(comando);
+		try {
+			java.sql.Statement stmt = conexao.createStatement();
+			ResultSet rs = stmt.executeQuery(comando);
+			while (rs.next()) {
+				
+				int id = rs.getInt("id");
+				String diversao = rs.getString("diversao");
+				String alimentacao = rs.getString("alimentacao");
+				String limpeza = rs.getString("limpeza");
+				String tempo = rs.getString("tempo");
+				String moedas = rs.getString("moedas");
+				int status = rs.getInt("status");
+				String jogadores_usuario = rs.getString("jogadores_usuario");
+				String pontuacao = rs.getString("pontuacao");
+				String pontuacaoTotal = rs.getString("pontuacaoTotal");
+				String pontuacaoMaior = rs.getString("pontuacaoMaior");
+				
+				sapo.setId(id);
+				sapo.setDiversao(diversao);
+				sapo.setAlimentacao(alimentacao);
+				sapo.setLimpeza(limpeza);
+				sapo.setTempo(tempo);
+				sapo.setMoedas(moedas);
+				sapo.setStatus(status);
+				sapo.setLogin(jogadores_usuario);
+				sapo.setPontuacao(pontuacao);
+				sapo.setPontosTotal(pontuacaoTotal);
+				sapo.setPontosMaior(pontuacaoMaior);
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return sapo;
+	}
+	
+	public List<Sapo> tabelaProdutos() {
+		String comando = "SELECT * FROM jogadores ";
+		System.out.println(comando);
+		List<Usuario> listUsuario = new ArrayList<Usuario>();
+		Usuario usuario = null;
+		try {
+			Statement stmt = conexao.createStatement(); 
+			ResultSet rs = stmt.executeQuery(comando);
+			while (rs.next()) {
+				usuario = new Usuario();
+				String login = rs.getString("usuario");
+				String nome = rs.getString("nome");
+				String nascimento = usuario.converteNascimentoParaFrontend(rs.getString("data_de_nascimento"));
+				String email = rs.getString("email");
+				String senha = rs.getString("senha");
+				String permissao = rs.getString("permissao");
+				
+		        usuario.setLogin(login);
+		        usuario.setNome(nome);
+		        usuario.setNascimento(nascimento);
+		        usuario.setEmail(email);
+		        usuario.setSenha(senha);
+		        usuario.setPermissao(permissao);
+		          				
+				listUsuario.add(usuario);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return listUsuario;
+	}
+	
+	public boolean atualizarDados(Sapo sapo) {
+		
+		String comando = "UPDATE sapos SET diversao=?, alimentacao=?, limpeza=?, tempo=?, moedas=?, status=?, pontuacao=?, pontuacaoTotal=?, pontuacaoMaior=?";
+		comando += " WHERE jogadores_usuario=?";
+		PreparedStatement p;
+		try {
+			p = this.conexao.prepareStatement(comando);
+			p.setString(1, sapo.getDiversao());
+			p.setString(2, sapo.getAlimentacao());
+			p.setString(3, sapo.getLimpeza());
+			p.setString(4, sapo.getTempo());
+			p.setString(5, sapo.getMoedas());
+			p.setInt(6, sapo.getStatus());
+			p.setString(7, sapo.getPontuacao());
+			p.setString(8, sapo.getPontosTotal());
+			p.setString(9, sapo.getPontosMaior());
+			p.setString(10, sapo.getLogin());
+			p.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	public int inserirSapo (Sapo sapo) {
+		
+		String comando = "INSERT INTO sapos (jogadores_usuario, diversao, alimentacao, limpeza, tempo, moedas, status, pontuacao, pontuacaoTotal, pontuacaoMaior) VALUES (?,?,?,?,?,?,?,?,?,?)";
+		PreparedStatement p;
+		int sapoId = 0;
+		
+		try {
+			p = this.conexao.prepareStatement(comando, Statement.RETURN_GENERATED_KEYS);
+			p.setString(1, sapo.getLogin());
+			p.setString(2, sapo.getDiversao());
+			p.setString(3, sapo.getAlimentacao());
+			p.setString(4, sapo.getLimpeza());
+			p.setString(5, sapo.getTempo());
+			p.setString(6, sapo.getMoedas());
+			p.setInt(7, sapo.getStatus());
+			p.setString(8, sapo.getPontuacao());
+			p.setString(9, sapo.getPontosTotal());
+			p.setString(10, sapo.getPontosMaior());
+			
+			p.executeUpdate();
+			
+			ResultSet rs = p.getGeneratedKeys();
+			if(rs.next()){
+				sapoId = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();	
+		}
+		return sapoId;
+	}
+	
+//	public Sapo buscarJogador(String login) {
+//		
+//		String comando = "SELECT * FROM jogadores WHERE usuario = '" + login + "'";
+//		Sapo sapo = new Sapo();
+//		try {
+//			java.sql.Statement stmt = conexao.createStatement();
+//			ResultSet rs = stmt.executeQuery(comando);
+//			while (rs.next()) {
+//				String nome = rs.getString("nome");
+//				String nascimento = usuario.converteNascimentoParaFrontend(rs.getString("data_de_nascimento"));
+//				String email = rs.getString("email");
+//				String senha = rs.getString("senha");
+//				String permissao = rs.getString("permissao");
+//				
+//				usuario.setLogin(login);
+//				usuario.setNome(nome);
+//				usuario.setNascimento(nascimento);
+//				usuario.setEmail(email);
+//				usuario.setSenha(senha);
+//		        usuario.setPermissao(permissao);		        
+//				
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return sapo;
+//	}
+	
+}

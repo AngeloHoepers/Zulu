@@ -1,0 +1,51 @@
+<div class="divGeral">
+  <img class="logoZulu" src="layout/imagens/logoteste.png" alt="Logo Zulu"/>
+  <div class="formulario">
+    <h1 class="tituloPag">Cadastro de Usuário:</h1>
+    <form name="frmcadastro" id="cadastroDoUsuario" method="post">
+      <table class="tableForm">
+        <tr>
+          	<td>Nome:</td>
+        </tr>
+        <tr>
+          	<td><input name="txtNome" type="text" maxlength="55"></td>
+        </tr>
+        <tr>
+          	<td>Data de Nascimento:</td>
+        </tr>
+        <tr>
+          	<td><input name="dateDataDeNascimento" type="date"></td>
+        </tr>
+        <tr>
+          <td>E-mail:</td>
+        </tr>
+        <tr>
+          	<td><input name="txtEmail" type="text" maxlength="80"></td>
+        </tr>
+        <tr>
+          	<td>Usuário:</td>
+        </tr>
+        <tr>
+          	<td><input name="txtUsuario" type="text" maxlength="16"></td>
+        </tr>
+        <tr>
+          	<td>Senha:</td>
+        </tr>
+        <tr>
+          	<td><input name="pwdSenha" type="password" maxlength="20"></td>
+        </tr>
+        <tr>
+        	<td>Confirmar Senha:</td>
+        </tr>
+        <tr>
+          	<td><input name="pwdConfirmarSenha" type="password" maxlength="20"></td>
+          	<td><input type="hidden" name="hdPermissao" value="1"></td>
+        </tr>
+        <tr>
+          <td><button type="reset" name="btnLimpar">Limpar</button>
+          <button type="button" name="btnCadastrar" onclick="cadastro()">Cadastrar</button></td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>
